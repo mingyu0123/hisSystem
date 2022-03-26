@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.his.hisSystem.mapper.UserMapper">
+ 
+ 	<select id="countUser" resultType="int" parameterType="hashmap">
+ 		SELECT 
+ 			COUNT(*)
+ 		FROM tb_user
+ 		WHERE DEL_YN = 'N'
+ 		<if test='searchType == "userId"'>
+        	AND USER_ID LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "userName"'>
+        	AND USER_NAME LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "userClass"'>
+        	AND USER_CLASS LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "userDept"'>
+        	AND USER_DEPT LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "userAuth"'>
+        	AND USER_AUTH LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "userPosition"'>
+        	AND USER_POSITION LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test="type!=null and !type.equals('')">
+   			AND USER_POSITION = 'doctor'
+   		 </if>
+ 	</select>
+ 
+ 	<select id="nextUserSeq" resultType="int">
+ 		select ifnull(max(a.user_seq),0)+1 from tb_user a
+ 	</select>
+ 
+    <select id="selectUserList" resultType="userDto">
+    
+        select R1.* FROM(
+			SELECT 
+					USER_SEQ userSeq,
+		            USER_ID userId,
+		            USER_NAME userName,
+		            (SELECT CODE_NAME FROM TB_CODE WHERE CODE = USER_CLASS AND CODE_TYPE = "dept") userClass,
+		            (SELECT CODE_NAME FROM TB_CODE WHERE CODE = USER_DEPT AND CODE_TYPE = "dept") userDept,
+		            (SELECT CODE_NAME FROM TB_CODE WHERE CODE = USER_AUTH AND CODE_TYPE = "auth") userAuth,
+		            DEL_YN delYn,
+		            INS_DATE insDate,
+		            UPT_DATE uptDate,
+		            (SELECT CODE_NAME FROM TB_CODE WHERE CODE = USER_POSITION AND CODE_TYPE = "position") userPosition 
+		    FROM tb_User
+		    WHERE DEL_YN = 'N'
+		    <if test='searchType == "userId"'>
+             	AND USER_ID LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+             <if test='searchType == "userName"'>
+             	AND USER_NAME LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+             <if test='searchType == "userClass"'>
+	        	AND USER_CLASS LIKE CONCAT('%',#{searchValue},'%')
+	        </if>
+             <if test='searchType == "userDept"'>
+             	AND USER_DEPT LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+             <if test='searchType == "userAuth"'>
+             	AND USER_AUTH LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+             <if test='searchType == "userPosition"'>
+             	AND USER_POSITION LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+              <if test="type!=null and !type.equals('')">
+	   			AND USER_POSITION = 'doctor'
+	   		 </if>   
+		    order by INS_DATE DESC
+		) R1
+		LIMIT #{start}, #{end}
+    
+    </select>
+    
+    <select id="detailUserList" resultType="userDto">
+    
+        SELECT
+			USER_SEQ userSeq,
+            USER_ID userId,
+            USER_PASSWORD userPassword,
+            USER_NAME userName,
+            (SELECT CODE_NAME FROM TB_CODE WHERE CODE = A.USER_CLASS AND CODE_TYPE = "dept") userClass,
+            (SELECT CODE_NAME FROM TB_CODE WHERE CODE = A.USER_DEPT AND CODE_TYPE = "dept") userDept,
+            (SELECT CODE_NAME FROM TB_CODE WHERE CODE = A.USER_AUTH AND CODE_TYPE = "auth") userAuth,
+            DEL_YN delYn,
+            INS_DATE insDate,
+            UPT_DATE uptDate,
+            (SELECT CODE_NAME FROM TB_CODE WHERE CODE = A.USER_POSITION AND CODE_TYPE = "position") userPosition,
+            (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = A.USER_WRITER) userWriter
+         FROM TB_USER A
+         WHERE USER_SEQ = #{userSeq}
+    
+    </select>
+    
+    <insert id="insertUser" parameterType="hashmap">
+    	INSERT INTO tb_User(
+			user_seq,
+		    user_id,
+		    user_password,
+		    user_name,
+		    user_class,
+		    user_dept,
+		    user_auth,
+		    del_yn,
+		    ins_date,
+		    upt_date,
+		    user_position,
+		    user_writer
+		) VALUES (
+			#{userSeq},
+		    #{userId},
+		    #{userPassword},
+		    #{userName},
+		    #{userClass},
+		    #{userDept},
+		    #{userAuth},
+		    'N',
+		    now(),
+		    now(),
+		    #{userPosition},
+		    #{userWriter}
+		)
+    </insert>
+    
+    <update id="updateUser" parameterType="hashmap">
+    	UPDATE tb_User SET
+    		user_name = #{userName},
+    		user_class = #{userClass},
+    		user_dept = #{userDept},
+    		<if test="userAuth!=null and !userAuth.equals('')">
+    			user_auth = #{userAuth},
+    		</if>
+    		user_position = #{userPosition},
+    		UPT_DATE = NOW()
+    	WHERE user_seq = #{userSeq}
+    </update>
+    
+    <update id="deleteUser" parameterType="hashmap">
+    	UPDATE tb_user SET
+    		DEL_YN = 'Y',
+    		UPT_DATE = NOW()
+    	WHERE user_seq = #{userSeq}
+    </update>
+    
+    <select id="userIdChk" resultType="int">
+    
+         SELECT
+			COUNT(1) CNT
+         FROM TB_USER
+         WHERE USER_Id = #{userId}
+    
+    </select>
+    
+    <select id="userPwdChk" resultType="int">
+    
+         SELECT
+			COUNT(1) CNT
+         FROM TB_USER
+         WHERE USER_Id = #{userId}
+         AND USER_PASSWORD = #{userPassword}
+    
+    </select>
+    
+    <update id="userPwdChg" parameterType="hashmap">
+    	UPDATE tb_user SET
+    		user_password = #{newPwd},
+    		upt_date = now()
+    	WHERE user_id = #{userId}
+    </update>
+    
+</mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.his.hisSystem.mapper.PstMapper">
+ 
+ 	<select id="countPst" resultType="int" parameterType="hashmap">
+ 		SELECT 
+ 			COUNT(*)
+ 		FROM tb_prescription
+ 		WHERE DEL_YN = 'N'
+ 		<if test='searchType == "title"'>
+        	AND PST_TITLE LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "writer"'>
+        	AND PST_WRITER = (SELECT USER_SEQ FROM TB_USER WHERE USER_NAME LIKE CONCAT('%',#{searchValue},'%'))
+        </if>
+        <if test="pstWriter!=null and !pstWriter.equals('')">
+   			AND PST_WRITER = #{pstWriter}
+   		 </if>
+ 	</select>
+ 
+ 	<select id="nextPstSeq" resultType="int">
+ 		select ifnull(max(a.pst_seq),0)+1 from tb_prescription a
+ 	</select>
+ 	 	
+ 	<select id="mainPstList" resultType="pstDto">
+    
+       select R1.* FROM(
+			SELECT 
+					PST_SEQ pstSeq
+		             , PST_TITLE pstTitle
+		             , PST_DRUGNAME pstDrugname
+		             , PST_VOLUME pstVolume
+		             , PST_NUMBER pstNumber
+		             , PST_DAYS pstDays
+		             , PST_YONGBYEOL pstYongbyeol
+		             , PST_NOTE pstNote
+		             , PST_NAME pstName
+		             , INS_DATE insDate
+		             , UPT_DATE uptDate
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = PST_WRITER) pstWriter
+		             , DEL_YN delYn
+		    FROM tb_prescription
+		    WHERE DEL_YN = 'N'      
+		    <if test="pstWriter!=null and !pstWriter.equals('')">
+	   			AND PST_WRITER = #{pstWriter}
+	   		 </if>   
+            order by INS_DATE DESC
+		) R1
+		LIMIT 0, 8;
+    
+    </select> 	
+ 	 	
+    <select id="selectPstList" resultType="pstDto">
+    
+        select R1.* FROM(
+			SELECT 
+					PST_SEQ pstSeq
+		             , PST_TITLE pstTitle
+		             , PST_DRUGNAME pstDrugname
+		             , PST_VOLUME pstVolume
+		             , PST_NUMBER pstNumber
+		             , PST_DAYS pstDays
+		             , PST_YONGBYEOL pstYongbyeol
+		             , PST_NOTE pstNote
+		             , PST_NAME pstName
+		             , INS_DATE insDate
+		             , UPT_DATE uptDate
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = PST_WRITER) pstWriter
+		             , DEL_YN delYn
+		             
+		    FROM tb_prescription
+		    WHERE DEL_YN = 'N'
+		    <if test='searchType == "title"'>
+             	AND PST_TITLE LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+             <if test='searchType == "writer"'>
+             	AND PST_WRITER = (SELECT USER_SEQ FROM TB_USER WHERE USER_NAME LIKE CONCAT('%',#{searchValue},'%'))
+             </if>
+             <if test="pstWriter!=null and !pstWriter.equals('')">
+	   			AND PST_WRITER = #{pstWriter}
+	   		 </if>
+		    order by INS_DATE DESC
+		) R1
+		LIMIT #{start}, #{end}
+    
+    </select>
+    
+    <select id="detailPstList" resultType="pstDto">
+    
+        SELECT 
+				PST_SEQ pstSeq
+	             , PST_TITLE pstTitle
+	             , PST_DRUGNAME pstDrugname
+	             , PST_VOLUME pstVolume
+	             , PST_NUMBER pstNumber
+	             , PST_DAYS pstDays
+	             , PST_YONGBYEOL pstYongbyeol
+	             , PST_NOTE pstNote
+	             , PST_NAME pstName
+	             , PST_BIRTHDATE pstBirthdate
+	             , INS_DATE insDate
+	             , UPT_DATE uptDate
+	             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = PST_WRITER) pstWriter
+	             , DEL_YN delYn
+	    FROM tb_prescription
+        WHERE PST_SEQ = #{pstSeq}
+    
+    </select>
+    
+    <insert id="insertPst" parameterType="hashmap">
+    	INSERT INTO tb_prescription(
+				   PST_SEQ
+	          	 , PST_TITLE 
+	             , PST_DRUGNAME 
+	             , PST_VOLUME 
+	             , PST_NUMBER 
+	             , PST_DAYS 
+	             , PST_YONGBYEOL 
+	             , PST_NOTE 
+	             , PST_NAME 
+	             , PST_BIRTHDATE
+	             , INS_DATE 
+	             , UPT_DATE 
+	             , PST_WRITER 
+	             , DEL_YN 
+		) VALUES (
+				#{pstSeq},
+			    #{pstTitle},
+			    #{pstDrugname},
+			    #{pstVolume},
+			    #{pstNumber},
+			    #{pstDays},
+			    #{pstYongbyeol},
+			    #{pstNote},
+			    #{pstName},
+			    #{pstBirthdate},
+			    now(),
+			    now(),
+			    #{pstWriter},
+			    'N'
+		)
+    </insert>
+    
+    <update id="updatePst" parameterType="hashmap">
+    	UPDATE tb_prescription SET
+    		PST_TITLE = #{pstTitle},
+    		PST_DRUGNAME = #{pstDrugname},
+    		PST_VOLUME = #{pstVolume},
+    		PST_NUMBER = #{pstNumber},
+    		PST_DAYS = #{pstDays},
+    		PST_YONGBYEOL = #{pstYongbyeol},
+    		PST_NOTE = #{pstNote},
+    		PST_NAME = #{pstName},
+    		PST_BIRTHDATE = #{pstBirthdate},
+    		UPT_DATE = NOW()
+    	WHERE PST_SEQ = #{pstSeq}
+    </update>
+    
+    <update id="deletePst" parameterType="hashmap">
+    	UPDATE tb_prescription SET
+    		DEL_YN = 'Y',
+    		UPT_DATE = NOW()
+    	WHERE PST_SEQ = #{pstSeq}
+    </update>
+    
+</mapper>

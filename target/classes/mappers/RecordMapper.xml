@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.his.hisSystem.mapper.RecordMapper">
+ 
+ 	<select id="countRecord" resultType="int" parameterType="hashmap">
+ 		SELECT 
+ 			COUNT(*)
+ 		FROM tb_record
+ 		WHERE DEL_YN = 'N'
+ 		<if test='searchType == "title"'>
+        	AND Record_TITLE LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "writer"'>
+        	AND Record_WRITER LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "date"'>
+        
+        </if>
+ 	</select>
+ 
+ 	<select id="nextRecordSeq" resultType="int">
+ 		select ifnull(max(a.rcd_seq),0)+1 from tb_record a
+ 	</select>
+ 	
+ 	<select id="mainRecordList" resultType="recordDto">
+    
+       select R1.* FROM(
+			SELECT 
+					rcd_seq rcdSeq
+		             , rcd_rounds rcdRounds
+		             , date_format(rcd_reqdate, '%y-%m-%d/%h ') rcdReqdate
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = rcd_reqdoctor) rcdReqdoctor
+		             , rcd_division rcdDivision
+		             , rcd_ptename rcdPtename
+		             , rcd_number rcdNumber
+		             , rcd_gender rcdGender
+		             , rcd_age rcdAge
+		             , (SELECT CODE_NAME FROM TB_CODE WHERE CODE = rcd_reqclass) rcdReqclass
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = rcd_maindoctor) rcdMaindoctor
+		             , (SELECT CODE_NAME FROM TB_CODE WHERE CODE = rcd_hopeclass) rcdHopeclass
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = rcd_hopedoctor) rcdHopedoctor
+		             , rcd_practice rcdPractice
+		             , del_yn delYn
+		             , ins_date insDate
+		             , upt_date uptDate
+		    FROM tb_record
+		    WHERE DEL_YN = 'N'         
+            order by INS_DATE DESC
+		) R1
+		LIMIT 0, 8;
+    
+    </select>
+ 	
+    <select id="selectRecordList" resultType="recordDto">
+    
+        select R1.* FROM(
+			SELECT 
+					rcd_seq rcdSeq
+		             , rcd_rounds rcdRounds
+		             , date_format(rcd_reqdate, '%y-%m-%d/%h ') rcdReqdate
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = rcd_reqdoctor) rcdReqdoctor
+		             , rcd_division rcdDivision
+		             , rcd_ptename rcdPtename
+		             , rcd_number rcdNumber
+		             , rcd_gender rcdGender
+		             , rcd_age rcdAge
+		             , (SELECT CODE_NAME FROM TB_CODE WHERE CODE = rcd_reqclass) rcdReqclass
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = rcd_maindoctor) rcdMaindoctor
+		             , (SELECT CODE_NAME FROM TB_CODE WHERE CODE = rcd_hopeclass) rcdHopeclass
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = rcd_hopedoctor) rcdHopedoctor
+		             , rcd_practice rcdPractice
+		             , del_yn delYn
+		             , ins_date insDate
+		             , upt_date uptDate
+		             
+		    FROM tb_record
+		    WHERE DEL_YN = 'N'
+		    <if test='searchType == "title"'>
+             	AND Record_TITLE LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+             <if test='searchType == "writer"'>
+             	AND Record_WRITER LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+             <if test='searchType == "date"'>
+             
+             </if>
+		    order by INS_DATE DESC
+		) R1
+		LIMIT #{start}, #{end}
+    
+    </select>
+    
+    <select id="detailRecordList" resultType="recordDto">
+    
+        SELECT 
+        		rcd_seq rcdSeq
+	             , rcd_rounds rcdRounds
+	             , date_format(rcd_reqdate, '%y-%m-%d/%h ') rcdReqdate
+	             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = rcd_reqdoctor) rcdReqdoctor
+	             , rcd_reqdoctor rcdReqdoctorOrg
+	             , rcd_division rcdDivision
+	             , rcd_ptename rcdPtename
+	             , rcd_number rcdNumber
+	             , rcd_gender rcdGender
+	             , rcd_age rcdAge
+	             , (SELECT CODE_NAME FROM TB_CODE WHERE CODE = rcd_reqclass) rcdReqclass
+	             , rcd_reqclass rcdReqclassOrg
+	             , (SELECT CODE_UPPER FROM TB_CODE WHERE CODE = rcd_reqclass) rcdReqUpper
+	             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = rcd_maindoctor) rcdMaindoctor
+	             , rcd_maindoctor rcdMaindoctorOrg
+	             , (SELECT CODE_NAME FROM TB_CODE WHERE CODE = rcd_hopeclass) rcdHopeclass
+	             , rcd_hopeclass rcdHopeclassOrg
+	             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = rcd_hopedoctor) rcdHopedoctor
+	             , rcd_hopedoctor rcdHopedoctorOrg
+	             , (SELECT CODE_UPPER FROM TB_CODE WHERE CODE = rcd_hopeclass) rcdHopeUpper
+	             , rcd_practice rcdPractice
+	             , del_yn delYn
+	             , ins_date insDate
+	             , upt_date uptDate
+        FROM tb_record
+        WHERE rcd_seq = #{rcdSeq}
+    
+    </select>
+    
+    <insert id="insertRecord" parameterType="hashmap">
+    	INSERT INTO tb_record(
+			 rcd_seq
+	         , rcd_rounds 
+             , rcd_reqdate 
+             , rcd_reqdoctor 
+             , rcd_division 
+             , rcd_ptename 
+             , rcd_number 
+             , rcd_gender 
+             , rcd_age 
+             , rcd_reqclass 
+             , rcd_maindoctor 
+             , rcd_hopeclass 
+             , rcd_hopedoctor 
+             , rcd_practice 
+             , del_yn 
+             , ins_date 
+	         , upt_date 
+		) VALUES (
+			#{rcdSeq},
+			#{rcdRounds},
+		    now(),
+		    #{rcdReqdoctor},
+		    #{rcdDivision},
+		    #{rcdPtename},
+		    #{rcdNumber},
+		    #{rcdGender},
+		    #{rcdAge},
+		    #{rcdReqclass},
+		    #{rcdMaindoctor},
+		    #{rcdHopeclass},
+		    #{rcdHopedoctor},
+		    #{rcdPractice},
+		    'N',
+		    now(),
+		    now()
+		)
+    </insert>
+    
+    <update id="updateRecord" parameterType="hashmap">
+    	UPDATE tb_record SET
+    		   rcd_rounds = #{rcdRounds}
+             , rcd_division = #{rcdDivision}
+             , rcd_ptename = #{rcdPtename}
+             , rcd_number = #{rcdNumber}
+             , rcd_gender = #{rcdGender}
+             , rcd_age = #{rcdAge}
+             , rcd_maindoctor = #{rcdMaindoctor} 
+             , rcd_hopeclass = #{rcdHopeclass}
+             , rcd_hopedoctor = #{rcdHopedoctor}
+    		 , UPT_DATE = NOW()
+    	WHERE rcd_seq = #{rcdSeq}
+    </update>
+    
+    <update id="deleteRecord" parameterType="hashmap">
+    	UPDATE tb_record SET
+    		DEL_YN = 'Y',
+    		UPT_DATE = NOW()
+    	WHERE rcd_seq = #{rcdSeq}
+    </update>
+    
+</mapper>

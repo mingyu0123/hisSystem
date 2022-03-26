@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.his.hisSystem.mapper.FileMapper">
+     
+    <select id="fileList" resultType="fileVO">
+    
+         SELECT
+			FILE_NO fileNo,
+		    BOARD_SEQ boardSeq,
+		    ORG_FILE_NAME orgFileName,
+		    FILE_PATH filePath,
+		    SAVE_FILE_NAME saveFileName,
+		    FILE_SIZE fileSize,
+		    DEL_YN delYn
+		 FROM TB_FILE
+		 WHERE BOARD_SEQ = #{boardSeq}
+		 AND DEL_YN = 'N'
+    
+    </select> 
+     
+    <insert id="insertFile" parameterType="hashmap">
+    	INSERT INTO tb_file(
+			FILE_NO,
+			BOARD_SEQ,
+			ORG_FILE_NAME,
+			FILE_PATH,
+			SAVE_FILE_NAME,
+			FILE_SIZE,
+			INS_DATE,
+			UPT_DATE,
+			DEL_YN
+		) VALUES (
+			(select ifnull(max(a.file_no),0)+1 from tb_file a),
+		    #{boardSeq},
+		    #{orgFileName},
+		    #{filePath},
+		    #{saveFileName},
+		    #{fileSize},
+		    now(),
+		    now(),
+		    'N'
+		)
+    </insert>
+    
+    <update id="deleteFile" parameterType="hashmap">
+    	UPDATE TB_FILE SET
+    		DEL_YN = 'Y',
+    		UPT_DATE = NOW()
+    	WHERE FILE_NO = #{fileNo}	
+    </update>
+    
+</mapper>

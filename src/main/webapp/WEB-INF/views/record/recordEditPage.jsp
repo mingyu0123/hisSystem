@@ -1,0 +1,412 @@
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+	<style type="text/css">
+		#dtTable th {
+			background-color: rgba(0,0,0,.05);
+			height: 50px;
+			padding: 10px;
+		}
+		#dtTable td {
+			padding: 10px;
+		}
+	</style>
+	<script src="/resources/js/jquery-3.6.0.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+	<link rel="stylesheet" href="/resources/css/bootstrap-theme.min.css">
+	
+	<script src="/resources/js/bootstrap.js"></script>
+	
+	<script src="/resources/js/main.js"></script>
+	<link href="/resources/css/main.css"  rel="stylesheet" type="text/css" /> 
+	<script type="text/javascript">
+	
+		$(document).ready(function() {
+			startDate();
+			$("#${menuCode}").addClass("menuActive");
+			
+			if('${boardType}' == 'upt'){
+				$("#rcdRounds").val("${detail.rcdRounds}").prop("selected", true);
+				$("#rcdGender").val("${detail.rcdGender}").prop("selected", true);
+				$("#rcdAge").val("${detail.rcdAge}").prop("selected", true);
+				
+				$("#mainDept").val("${detail.rcdHopeUpper}").prop("selected", true);
+				
+				fnCodeList('${detail.rcdHopeUpper}','hope');
+			}
+	    }); 
+	
+	
+		function fnEdit(boardType){
+			
+			var rcdRounds = $("#rcdRounds").val();
+			var rcdDivision = $("#rcdDivision").val();
+			var rcdNumber = $("#rcdNumber").val();
+			var rcdPtename = $("#rcdPtename").val();
+			var rcdGender = $("#rcdGender").val();
+			var rcdAge = $("#rcdAge").val();
+			var rcdMaindoctor = $("#rcdMaindoctor").val();
+			var rcdHopedoctor = $("#rcdHopedoctor").val();
+			var rcdReqdoctor = $("#rcdReqdoctor").val();
+			var middleDept = $("#middleDept").val();
+			var middleDept2 = $("#middleDept2").val();
+			
+			if(rcdRounds == ""){
+				alert("회진을 입력하세요");
+				return;
+				
+			}
+			
+			if(rcdDivision == ""){
+				alert("구분을 입력하세요");
+				return;
+				
+			}
+			
+			if(rcdNumber == ""){
+				alert("등록번호를 입력하세요");
+				return;
+				
+			}
+			
+			if(rcdPtename == ""){
+				alert("환자명을 입력하세요");
+				return;
+				
+			}
+			
+			if(rcdGender == ""){
+				alert("성별을 입력하세요");
+				return;
+				
+			}
+			
+			if(rcdAge == ""){
+				alert("나이를 입력하세요");
+				return;
+				
+			}
+			
+			if(rcdMaindoctor == ""){
+				alert("주치의를 입력하세요");
+				return;
+				
+			}
+			
+			if(rcdHopedoctor == ""){
+				alert("희망의를 입력하세요");
+				return;
+				
+			}
+			
+			if(rcdReqdoctor == ""){
+				alert("의뢰의를 입력하세요");
+				return;
+				
+			}
+			
+			if(middleDept == ""){
+				alert("희망과를 입력하세요");
+				return;
+				
+			}
+			
+			if(middleDept2 == "" && '${boardType}' == 'ins'){
+				alert("의뢰과를 입력하세요");
+				return;
+				
+			}
+			
+			if(boardType == "ins"){
+				var yn = confirm("진료기록을 등록하시겠습니까?"); 
+			}else if(boardType == "upt"){
+				var yn = confirm("진료기록을 수정하시겠습니까?"); 
+			}
+			
+			if(yn){
+				
+				var form = $('#rcdForm')[0]
+			    var data = new FormData(form);
+								
+				$.ajax({
+		            url:"/record/recordEdit.do",
+		            data:data,
+		            type:"post",
+		            enctype: 'multipart/form-data',
+		            processData: false,
+		            contentType: false,
+		            success:function(data){
+		               	
+		            	//window.location.href="/board/boardList.do?menuCode=${menuCode}&nowPage=${nowPage}&cntPerPage=${cntPerPage}"
+		            	var form = document.dataForm;
+		    			
+		    			form.action = "/record/recordList.do";
+		    			form.method = "post"; 
+		    			form.nowPage.value = ${nowPage};
+		    			form.cntPerPage.value = ${cntPerPage};
+		    			form.submit();
+		            	
+		                
+		            },
+		            error:function(jqxhr, textStatus, errorThrown){
+		                console.log("ajax 처리 실패");
+		                
+		                // 에러 로그
+		                console.log(jqxhr);
+		                console.log(textStatus);
+		                console.log(errorThrown);
+		            }
+		        });
+				
+				
+			}else{
+				return;
+			}
+			
+		}
+		
+		function fnList() {
+			//window.location.href= "/board/boardList.do?menuCode=${menuCode}&nowPage=${nowPage}&cntPerPage=${cntPerPage}";
+			var form = document.dataForm;
+			
+			form.action = "/record/recordList.do";
+			form.method = "post"; 
+			form.nowPage.value = ${nowPage};
+			form.cntPerPage.value = ${cntPerPage};
+			form.submit();
+		}
+		
+		function fnNumOnly(){
+			
+			if((event.keyCode > 48 && event.keyCode < 57 ) 
+			      || event.keyCode == 8 //backspace
+			      || event.keyCode == 37 || event.keyCode == 39 //방향키 →, ←
+			      || event.keyCode == 46 //delete키
+			      || event.keyCode == 39){
+			   }else{
+			   event.returnValue=false;
+			   }
+			
+		}
+		
+		function fnCodeList(codeUpper,type) {
+			
+			$.ajax({
+	            url:"/code/codeType.do",
+	            data:{
+	            		codeType:'dept',
+	            		codeUpper:codeUpper,
+	            		codeCategory:'middle'
+	            	},
+	            type:"post",
+	            dataType : "JSON",
+	            success:function(data){
+	               	
+	            	//$("#userList").html(data);
+	            	callbackCodeList(data.codeList,type);
+	            	
+	                
+	            },
+	            error:function(jqxhr, textStatus, errorThrown){
+	                console.log("ajax 처리 실패");
+	                
+	                // 에러 로그
+	                console.log(jqxhr);
+	                console.log(textStatus);
+	                console.log(errorThrown);
+	            }
+	        });
+			
+		}
+		
+		function callbackCodeList(codeList,type) {
+			
+			if(type == "hope") {
+				$("#middleDept").empty();
+				
+				$.each(codeList,function(i,v){
+					
+					
+					$("#middleDept").append("<option value='"+v.code+"'>"+v.codeName+"</option>");
+					
+				});
+				$("#middleDept").val("${detail.rcdHopeclassOrg}").prop("selected", true);
+				
+			}else if(type == "req"){
+				$("#middleDept2").empty();
+				
+				$.each(codeList,function(i,v){
+					
+					
+					$("#middleDept2").append("<option value='"+v.code+"'>"+v.codeName+"</option>");
+					
+				});
+			}
+			
+			
+			
+		}
+		
+		function fnuserSearch(type) {
+			
+	 		var url = "/user/userSearchPage.do?nowPage=1&cntPerPage=10&type="+type;
+			var name = "userSearchPage";
+			var popupX = (document.body.offsetWidth / 2) - (750 / 2);
+			var popupY= (window.screen.height / 2) - (600 / 2);
+			
+			var options = 'top='+popupY+', left='+popupX+', width=750, height=600, status=no, menubar=no, toolbar=no, resizable=no';
+			
+		    window.open(url, name, options);
+	 		
+	 	}
+	</script>
+</head>
+<body style="font-size:15px">
+<form id="dataForm" name="dataForm">
+	<input type="hidden" name="rcdSeq" value="${detail.rcdSeq}">
+	<input type="hidden" id="menuCode" name="menuCode" value="${menuCode }">
+	<input type="hidden" name="nowPage" value="${nowPage}">
+	<input type="hidden" name="cntPerPage" value="${cntPerPage}">
+	<input type="hidden" name="boardType" value="${boardType}">
+</form>
+<div style="width:100%;height: 1077px">
+	
+	<!-- 사이드메뉴 -->
+	<jsp:include page="/WEB-INF/views/leftMenu.jsp"></jsp:include>
+	
+	<div id="rightDv" style="width:88%;height: 1077px;float: left;background-color: ghostwhite;">
+	
+		<!-- 상단 -->
+		<jsp:include page="/WEB-INF/views/top.jsp"></jsp:include>
+		
+		<div id="pstList" style="margin:5% auto;width:60%;height:779px">
+			
+			<form id="rcdForm" name="rcdForm" method="post" enctype="multipart/form-data">
+	
+				<input type="hidden" id="rcdSeq" name="rcdSeq" value="${detail.rcdSeq }">
+				<input type="hidden" id="boardType" name="boardType" value="${boardType }">
+				
+				<c:if test="${boardType == 'ins' }">
+					<h2 style="text-align: center;margin-top:20px;margin-bottom:20px;font-size: 30px">진료기록 등록</h2>
+				</c:if>	
+				<c:if test="${boardType == 'upt' }">
+					<h2 style="text-align: center;margin-top:20px;margin-bottom:20px;font-size: 30px">진료기록 수정</h2>
+				</c:if>	
+				
+				<table id="dtTable" border="1" style="width:60%;margin:0 auto">
+					<colgroup> 
+						<col width="25%"/>
+						<col width="75%"/>
+					</colgroup>
+					<tbody>
+						<tr>
+							<th>회진</th>
+							<td>
+								<select id="rcdRounds" name="rcdRounds" class="form-control" style="width:100px;display: initial;font-size: 15px">
+									<option value="N">N</option>
+									<option value="Y">Y</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<th>구분</th>
+							<td><input id="rcdDivision" name="rcdDivision" style="height: 30px;font-size:15px" class="form-control mr-sm-2" value="${detail.rcdDivision }" onKeyup="this.value=this.value.replace(/[^.0-9]/g,'');"></td>
+						</tr>
+						<tr>
+							<th>등록번호</th>
+							<td><input id="rcdNumber" name="rcdNumber" style="height: 30px;font-size:15px" class="form-control mr-sm-2" value="${detail.rcdNumber }" onKeyup="this.value=this.value.replace(/[^0-9]/g,'');"></td>
+						</tr>
+						<tr>
+							<th>환자명</th>
+							<td><input id="rcdPtename" name="rcdPtename" style="height: 30px;font-size:15px" class="form-control mr-sm-2" value="${detail.rcdPtename }"></td>
+						</tr>
+						<tr>
+							<th>S/A</th>
+							<td>
+								<select id="rcdGender" name="rcdGender" class="form-control" style="width:100px;display: initial;font-size: 15px">
+									<option value="M">남성</option>
+									<option value="Y">여성</option>
+								</select>
+								<select id="rcdAge" name="rcdAge" class="form-control" style="width:100px;display: initial;font-size: 15px">
+									<c:forEach begin="1" end="100" varStatus="sta">
+										<option value="${sta.index }">${sta.index }</option>
+									</c:forEach>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<th>주치의</th>
+							<td>
+								<input id="rcdMaindoctorNm" name="rcdMaindoctorNm" disabled="disabled" style="width:100px;height: 30px;font-size:15px;display: initial;" class="form-control mr-sm-2" value="${detail.rcdMaindoctor }">
+								<input type="hidden" id="rcdMaindoctor" name="rcdMaindoctor" value="${detail.rcdMaindoctorOrg }">
+								<button type="button" onclick="fnuserSearch('main')" class="btn btn-outline-dark" style="font-size:15px">검색</button>
+							</td>
+						</tr>
+						<tr>
+							<th>희망과</th>
+							<td>
+								<select id="mainDept" name="mainDept" class="form-control" style="width:20%;font-size: 13px;display:initial;" onchange="fnCodeList(this.value,'hope')">
+									<option value="surgery">외과</option>
+									<option value="medicine">내과</option>
+									<option value="other">기타</option>
+								</select>
+								<select id="middleDept" name="middleDept" class="form-control" style="width:20%;font-size: 13px;display:initial;"></select>
+							</td>
+						</tr>
+						<tr>
+							<th>희망의</th>
+							<td>
+								<input id="rcdHopedoctorNm" name="rcdHopedoctorNm" disabled="disabled" style="width:100px;height: 30px;font-size:15px;display: initial;" class="form-control mr-sm-2" value="${detail.rcdHopedoctor }">
+								<input type="hidden" id="rcdHopedoctor" name="rcdHopedoctor" value="${detail.rcdHopedoctorOrg }">
+								<button type="button" onclick="fnuserSearch('hope')" class="btn btn-outline-dark" style="font-size:15px">검색</button>
+							</td>
+						</tr>
+						<c:if test="${boardType == 'ins' }">
+							<tr>
+								<th>의뢰과</th>
+								<td>
+									<select id="mainDept2" name="mainDept2" class="form-control" style="width:20%;font-size: 13px;display:initial;" onchange="fnCodeList(this.value,'req')">
+										<option value="surgery">외과</option>
+										<option value="medicine">내과</option>
+										<option value="other">기타</option>
+									</select>
+									<select id="middleDept2" name="middleDept2" class="form-control" style="width:20%;font-size: 13px;display:initial;"></select>
+								</td>
+							</tr>
+							<tr>
+								<th>의뢰의</th>
+								<td>
+									<input type="text" id="rcdReqdoctorNm" name="rcdReqdoctorNm" disabled="disabled" style="width:100px;height: 30px;font-size:15px;display: initial;" class="form-control mr-sm-2" value="${detail.rcdReqdoctor }" >
+									<input type="hidden" id="rcdReqdoctor" name="rcdReqdoctor" value="${detail.rcdReqdoctorOrg }">
+									<button type="button" onclick="fnuserSearch('req')" class="btn btn-outline-dark" style="font-size:15px">검색</button>	
+								</td>
+							</tr>
+						</c:if>
+					</tbody>
+				</table>
+			</form>
+				<div style="text-align: center;margin-top:5px;margin-right:15px">
+					<c:if test="${boardType == 'ins' }">
+						<button type="button" onclick="fnEdit('ins')" class="btn btn-outline-dark" style="font-size:15px">등록</button>
+					</c:if>	
+					<c:if test="${boardType == 'upt' }">
+						<button type="button" onclick="fnEdit('upt')" class="btn btn-outline-dark" style="font-size:15px">수정</button>
+					</c:if>	
+					<button type="button" onclick="fnList()" class="btn btn-outline-dark" style="font-size:15px">취소</button>
+				</div>
+			
+		</div>
+		
+		<!-- 하단 -->
+		<jsp:include page="/WEB-INF/views/footer.jsp"></jsp:include>
+		
+	</div>
+	
+</div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.his.hisSystem.mapper.LoginMapper">
+ 
+    <select id="loginCheck" resultType="int">
+    
+        SELECT 
+        	COUNT(*) CNT
+        FROM TB_USER
+        WHERE user_id = #{userId}
+        AND user_password = #{userPwd}
+        AND DEL_YN = 'N'	
+    
+    </select>
+    
+    <select id="loginUserInfo" resultType="userDto" parameterType="map">
+    
+        SELECT
+			user_seq userSeq,
+		    user_id userId,
+		    user_password userPassword,
+		    user_name userName,
+		    (SELECT CODE_NAME FROM TB_CODE WHERE CODE = USER_DEPT AND CODE_TYPE = "dept") userDept,
+		    (SELECT CODE_NAME FROM TB_CODE WHERE CODE = USER_POSITION AND CODE_TYPE = "position") userPosition,
+		    (SELECT CODE_NAME FROM TB_CODE WHERE CODE = USER_AUTH AND CODE_TYPE = "auth") userAuth,
+		    del_yn delYn,
+		    ins_date insDate,
+		    upt_date uptDate
+		FROM tb_user
+		where user_id = #{userId}
+    
+    </select>
+    
+</mapper>

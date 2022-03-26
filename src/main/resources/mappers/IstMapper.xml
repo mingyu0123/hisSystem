@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.his.hisSystem.mapper.IstMapper">
+ 
+    <select id="countIst" resultType="int" parameterType="hashmap">
+ 		SELECT 
+ 			COUNT(*)
+ 		FROM tb_instructions
+ 		WHERE 1=1
+ 		<if test='searchType == "title"'>
+        	AND IST_TITLE LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "writer"'>
+        	AND IST_RECIPIENT IN (SELECT USER_SEQ FROM TB_USER WHERE USER_NAME LIKE CONCAT('%',#{searchValue},'%'))
+        </if>
+        <if test="istWriter!=null and !istWriter.equals('')">
+   			AND IST_WRITER = #{istWriter}
+   		 </if>
+        <if test="istRecipient!=null and !istRecipient.equals('')">
+   			AND IST_RECIPIENT = #{istRecipient}
+   		 </if>
+ 	</select>
+ 
+ 	<select id="nextIstSeq" resultType="int">
+ 		select ifnull(max(a.ist_seq),0)+1 from tb_instructions a
+ 	</select>
+ 	 	
+ 	<select id="mainIstList" resultType="istDto">
+    
+       select R1.* FROM(
+			SELECT 
+					IST_SEQ istSeq
+		             , IST_TITLE istTitle
+		             , IST_CONTENT istContent
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = IST_RECIPIENT) istRecipient
+		             , IST_STATUS istStatus
+		             , IST_STATUSDAY istStatusday
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = IST_WRITER) istWriter
+		             , date_format(INS_DATE, '%Y-%m-%d') insDate
+		             , INS_DATE insDateDetail
+		    FROM tb_instructions 
+		    WHERE 1=1
+		    <if test="istWriter!=null and !istWriter.equals('')">
+	   			AND IST_WRITER = #{istWriter}
+	   		 </if>
+             <if test="istRecipient!=null and !istRecipient.equals('')">
+    			AND IST_RECIPIENT = #{istRecipient}
+    		 </if>
+            order by INS_DATE DESC
+		) R1
+		LIMIT 0, 8;
+    
+    </select> 	
+ 	 	
+    <select id="selectIstList" resultType="istDto">
+    
+        select R1.* FROM(
+			SELECT 
+					IST_SEQ istSeq
+		             , IST_TITLE istTitle
+		             , IST_CONTENT istContent
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = IST_RECIPIENT) istRecipient
+		             , IST_STATUS istStatus
+		             , IST_STATUSDAY istStatusday
+		             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = IST_WRITER) istWriter
+		             , date_format(INS_DATE, '%Y-%m-%d') insDate
+		             , INS_DATE insDateDetail
+		             
+		    FROM tb_instructions
+		    WHERE 1=1
+		    <if test='searchType == "title"'>
+             	AND IST_TITLE LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+             <if test='searchType == "writer"'>
+             	AND IST_RECIPIENT IN (SELECT USER_SEQ FROM TB_USER WHERE USER_NAME LIKE CONCAT('%',#{searchValue},'%'))
+             </if>
+             <if test="istWriter!=null and !istWriter.equals('')">
+	   			AND IST_WRITER = #{istWriter}
+	   		 </if>
+             <if test="istRecipient!=null and !istRecipient.equals('')">
+    			AND IST_RECIPIENT = #{istRecipient}
+    		 </if>
+		    order by INS_DATE DESC
+		) R1
+		LIMIT #{start}, #{end}
+    
+    </select>
+    
+    <select id="detailIstList" resultType="istDto">
+    
+        SELECT 
+				IST_SEQ istSeq
+	             , IST_TITLE istTitle
+	             , IST_CONTENT istContent
+	             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = IST_RECIPIENT) istRecipient
+	             , IST_STATUS istStatus
+	             , (SELECT USER_NAME FROM TB_USER WHERE USER_SEQ = IST_WRITER) istWriter
+	             , INS_DATE insDate
+	    FROM tb_instructions
+        WHERE IST_SEQ = #{istSeq}
+    
+    </select>
+    
+    <insert id="insertIst" parameterType="hashmap">
+    	INSERT INTO tb_instructions(
+				   IST_SEQ 
+	             , IST_TITLE 
+	             , IST_CONTENT 
+	             , IST_RECIPIENT 
+	             , IST_STATUS 
+	             , IST_WRITER
+	             , INS_DATE
+		) VALUES (
+				#{istSeq},
+			    #{istTitle},
+			    #{istContent},
+			    #{istRecipient},
+			    'N',
+			    #{istWriter},
+			    now()
+		)
+    </insert>
+    
+    <select id="recipientCnt" resultType="int">
+ 		SELECT
+			COUNT(1) CNT
+        FROM tb_instructions
+        WHERE IST_RECIPIENT = #{istRecipient}
+ 	</select>
+ 	
+ 	<select id="selectStatus" resultType="String">
+ 		SELECT 
+			IST_STATUS
+		FROM tb_instructions
+        WHERE IST_SEQ = #{istSeq}
+ 	</select>
+ 	
+ 	<update id="updateStatus" parameterType="hashmap">
+ 		UPDATE tb_instructions SET
+ 			IST_STATUS = 'Y',
+ 			IST_STATUSDAY = now()
+ 		WHERE IST_SEQ = #{istSeq}
+ 	</update>
+    
+</mapper>

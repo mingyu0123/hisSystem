@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.his.hisSystem.mapper.codeMapper">
+     
+    <select id="codeList" parameterType="hashmap" resultType="codeDto">
+    
+         SELECT
+			CODE,
+            CODE_NAME codeName,
+            CODE_ORDER codeOrder
+        FROM TB_CODE    
+        WHERE DEL_YN = 'N'    
+        <if test='codeCategory == "large"'>
+        	AND CODE_TYPE = #{codeType}
+        	AND CODE_CATEGORY = 'large'
+        </if>
+        <if test='codeCategory == "middle"'>
+        	AND CODE_TYPE = #{codeType}
+        	AND CODE_CATEGORY = 'middle'
+        	AND CODE_UPPER = #{codeUpper}
+        </if>
+    
+    </select> 
+         
+</mapper>

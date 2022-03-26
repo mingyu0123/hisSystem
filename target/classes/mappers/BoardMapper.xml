@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.his.hisSystem.mapper.BoardMapper">
+ 
+ 	<select id="countBoard" resultType="int" parameterType="hashmap">
+ 		SELECT 
+ 			COUNT(*)
+ 		FROM TB_BOARD
+ 		WHERE DEL_YN = 'N'
+ 		<if test='searchType == "title"'>
+        	AND BOARD_TITLE LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "writer"'>
+        	AND BOARD_WRITER LIKE CONCAT('%',#{searchValue},'%')
+        </if>
+        <if test='searchType == "date"'>
+        
+        </if>
+ 	</select>
+ 
+ 	<select id="nextBoardSeq" resultType="int">
+ 		select ifnull(max(a.board_seq),0)+1 from tb_board a
+ 	</select>
+ 	
+ 	<select id="mainBoardList" resultType="boardDto">
+    
+       select R1.* FROM(
+			SELECT 
+					BOARD_SEQ boardSeq
+		             , BOARD_TITLE boardTitle
+		             , BOARD_CONTENT boardContent
+		             , BOARD_WRITER boardWriter
+		             , BOARD_HITS boardHits
+		             , DEL_YN delYn
+		             , INS_DATE insDate
+		             , UPT_DATE uptDate
+		    FROM tb_board
+		    WHERE DEL_YN = 'N'         
+            order by INS_DATE DESC
+		) R1
+		LIMIT 0, 8;
+    
+    </select>
+ 	
+    <select id="selectBoardList" resultType="boardDto">
+    
+        select R1.* FROM(
+			SELECT 
+					BOARD_SEQ boardSeq
+		             , BOARD_TITLE boardTitle
+		             , BOARD_CONTENT boardContent
+		             , BOARD_WRITER boardWriter
+		             , BOARD_HITS boardHits
+		             , DEL_YN delYn
+		             , INS_DATE insDate
+		             , UPT_DATE uptDate
+		             
+		    FROM tb_board
+		    WHERE DEL_YN = 'N'
+		    <if test='searchType == "title"'>
+             	AND BOARD_TITLE LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+             <if test='searchType == "writer"'>
+             	AND BOARD_WRITER LIKE CONCAT('%',#{searchValue},'%')
+             </if>
+             <if test='searchType == "date"'>
+             
+             </if>
+		    order by INS_DATE DESC
+		) R1
+		LIMIT #{start}, #{end}
+    
+    </select>
+    
+    <select id="detailBoardList" resultType="boardDto">
+    
+        SELECT BOARD_SEQ boardSeq
+             , BOARD_TITLE boardTitle
+             , BOARD_CONTENT boardContent
+             , BOARD_WRITER boardWriter
+             , BOARD_HITS boardHits
+             , DEL_YN delYn
+             , INS_DATE insDate
+             , UPT_DATE uptDate
+             , (SELECT SAVE_FILE_NAME FROM TB_FILE WHERE BOARD_SEQ = #{boardSeq} AND DEL_YN = 'N') filePath
+        FROM TB_BOARD
+        WHERE BOARD_SEQ = #{boardSeq}
+    
+    </select>
+    
+    <insert id="insertBoard" parameterType="hashmap">
+    	INSERT INTO tb_board(
+			BOARD_SEQ,
+		    BOARD_WRITER,
+		    BOARD_TITLE,
+		    BOARD_CONTENT,
+		    BOARD_HITS,
+		    DEL_YN,
+		    INS_DATE,
+		    UPT_DATE
+		) VALUES (
+			#{boardSeq},
+		    #{boardWriter},
+		    #{boardTitle},
+		    #{boardContent},
+		    0,
+		    'N',
+		    now(),
+		    now()
+		)
+    </insert>
+    
+    <update id="updateBoard" parameterType="hashmap">
+    	UPDATE tb_board SET
+    		BOARD_TITLE = #{boardTitle},
+    		BOARD_CONTENT = #{boardContent},
+    		UPT_DATE = NOW()
+    	WHERE BOARD_SEQ = #{boardSeq}
+    </update>
+    
+    <update id="deleteBoard" parameterType="hashmap">
+    	UPDATE tb_board SET
+    		DEL_YN = 'Y',
+    		UPT_DATE = NOW()
+    	WHERE BOARD_SEQ = #{boardSeq}
+    </update>
+    
+    <update id="udateHits" parameterType="hashmap">
+    	UPDATE tb_board set
+        	board_hits = board_hits+1
+        where board_seq = #{boardSeq}
+    </update>
+    
+</mapper>

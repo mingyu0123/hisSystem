@@ -1,0 +1,95 @@
+@charset "EUC-KR";
+
+.leftLi {
+			padding:20px;
+			font-size: 18px;
+			color:white;
+		}
+		
+		.leftLi > a{
+			text-decoration: none;
+			color:white;
+			cursor: pointer;
+		}
+		
+		.leftLi:hover{
+			background-color: lightgrey;
+			color:lightslategrey;
+			border-radius: 2px;
+		}
+		
+		.leftLicon{
+			padding: 40px;
+			text-align:center;
+			color:white;
+			display: none;
+		}
+		
+		.leftLicon2{
+			padding: 30px;
+			font-size: 20px;
+			text-align:left;
+			color:white;
+		}
+				
+		.aCss{
+			text-decoration: none;
+			color:white;
+			cursor: pointer;
+		}
+		
+		.aCss:hover{
+			color:white;
+		}
+		
+		.aCss:visited{
+			color:white;
+		}
+		
+		.infoDv{
+			width:130px;
+			height:80px;
+			position: absolute;
+			float: right;
+			left:92%;
+			top:110%;
+			border-radius: 5px;
+			border:1px solid black;
+			display: none;
+		}
+		
+		.infoDv > p:hover{
+			background-color: #343a40;
+			color:white;
+		}
+		
+		#footerDv{
+			width:100%;
+			height: 40px;
+			float:left;
+			background-color: #343a40
+		}
+		
+		#footerDv > div > span{
+			color:white;
+		}
+		
+		.footerInfo{
+			width:30%;
+			height:40px;
+			float:left;
+			padding:10px;
+		}
+		
+		.footerSubDv{
+			width:15%;
+			height:40px;
+			float:left;
+			padding:10px;
+		}
+		
+		.menuActive{
+			background-color: lightgrey;
+			color:lightslategrey;
+			border-radius: 2px;
+		}
